@@ -2,15 +2,15 @@ use anyhow::Result;
 use askama::Template;
 use axum::{
     Router,
-    extract::{Form, State, Query},
+    extract::{Form, Query, State},
     http::StatusCode,
     response::{Html, Redirect},
     routing::{get, post},
 };
-use std::collections::HashMap;
 use deadpool_postgres::tokio_postgres::NoTls;
 use deadpool_postgres::{Client, Config, ManagerConfig, Pool, RecyclingMethod, Runtime};
 use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
 
 #[derive(Debug, Serialize)]
 pub struct Movie {
@@ -90,16 +90,18 @@ async fn insert_movie(
         .get()
         .await
         .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
-    
-    // Check if movie already exists
+
     let check_stmt = client
         .prepare("SELECT title FROM movie WHERE title = $1")
         .await
         .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
     let existing = client.query_one(&check_stmt, &[&form.title]).await;
-    
+
     if existing.is_ok() {
-        Ok(Redirect::to(&format!("/?message='{}' is already in your watchlist", form.title)))
+        Ok(Redirect::to(&format!(
+            "/?message='{}' is already in your watchlist",
+            form.title
+        )))
     } else {
         let stmt = client
             .prepare("INSERT INTO movie (title) VALUES ($1)")
@@ -154,7 +156,7 @@ async fn main() -> Result<()> {
         .with_state(state);
 
     let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await?;
-    println!("🚀 Stardust server running on http://localhost:3000");
+    println!("Stardust server running on http://localhost:3000");
 
     axum::serve(listener, app).await?;
 
