@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stardust - Movie Watchlist</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d1b1b 100%);
+            color: #e0e0e0;
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            font-weight: 300;
+            color: #ffffff;
+            margin-bottom: 0.5rem;
+            text-shadow: 0 0 20px rgba(220, 20, 60, 0.3);
+        }
+
+        .header p {
+            color: #b0b0b0;
+            font-size: 1.1rem;
+        }
+
+        .message {
+            background: rgba(220, 20, 60, 0.1);
+            border: 1px solid rgba(220, 20, 60, 0.3);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 2rem;
+            text-align: center;
+            color: #ff6b6b;
+            backdrop-filter: blur(10px);
+            font-weight: 500;
+        }
+
+        .add-movie-form {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(220, 20, 60, 0.3);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 3rem;
+            backdrop-filter: blur(10px);
+        }
+
+        .form-group {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .form-group input {
+            flex: 1;
+            padding: 0.8rem 1.2rem;
+            border: 1px solid rgba(220, 20, 60, 0.3);
+            border-radius: 8px;
+            background: rgba(0, 0, 0, 0.3);
+            color: #ffffff;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #dc143c;
+            box-shadow: 0 0 10px rgba(220, 20, 60, 0.2);
+        }
+
+        .form-group button {
+            padding: 0.8rem 2rem;
+            border: none;
+            border-radius: 8px;
+            background: linear-gradient(135deg, #dc143c 0%, #8b0000 100%);
+            color: white;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .form-group button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(220, 20, 60, 0.4);
+        }
+
+        .movies-section {
+            margin-top: 3rem;
+        }
+
+        .movies-section h2 {
+            font-size: 1.8rem;
+            font-weight: 300;
+            margin-bottom: 1.5rem;
+            color: #ffffff;
+        }
+
+        .movie-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .movie-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(220, 20, 60, 0.2);
+            border-radius: 12px;
+            padding: 1.5rem;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .movie-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(220, 20, 60, 0.2);
+            border-color: rgba(220, 20, 60, 0.4);
+        }
+
+        .movie-title {
+            font-size: 1.1rem;
+            color: #ffffff;
+            font-weight: 400;
+        }
+
+        .delete-form {
+            margin: 0;
+        }
+
+        .delete-btn {
+            background: rgba(220, 20, 60, 0.2);
+            border: 1px solid rgba(220, 20, 60, 0.4);
+            color: #ff6b6b;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .delete-btn:hover {
+            background: rgba(220, 20, 60, 0.3);
+            border-color: #dc143c;
+            color: #ffffff;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: #808080;
+            font-style: italic;
+        }
+
+        .movie-count {
+            text-align: center;
+            margin-bottom: 2rem;
+            color: #b0b0b0;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>Stardust</h1>
+            <p>Your personal movie watchlist</p>
+        </header>
+
+        {% if !message.is_empty() %}
+        <div class="message">
+            {{ message }}
+        </div>
+        {% endif %}
+
+        <div class="add-movie-form">
+            <form method="post" action="/add" class="form-group">
+                <input
+                    type="text"
+                    name="title"
+                    placeholder="Enter movie title..."
+                    required
+                    autocomplete="off"
+                >
+                <button type="submit">Add Movie</button>
+            </form>
+        </div>
+
+        <div class="movies-section">
+            {% if !movies.is_empty() %}
+                <div class="movie-count">{{ movies.len() }} movie{% if movies.len() != 1 %}s{% endif %} in your watchlist</div>
+                <div class="movie-grid">
+                    {% for movie in movies %}
+                        <div class="movie-card">
+                            <span class="movie-title">{{ movie.title }}</span>
+                            <form method="post" action="/delete" class="delete-form">
+                                <input type="hidden" name="title" value="{{ movie.title }}">
+                                <button type="submit" class="delete-btn">Remove</button>
+                            </form>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="empty-state">
+                    <p>Your watchlist is empty. Add some movies to get started!</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>
